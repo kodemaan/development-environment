@@ -19,3 +19,7 @@ List of software
 * symlink your code directory to ./code folder so it syncs to VM as /code root folder
 
 This can all be re-configured via ansible config files directly too if needed.
+
+## Install
+
+To install this simply install https://www.vagrantup.com/ for your platform, and run vagrant up
