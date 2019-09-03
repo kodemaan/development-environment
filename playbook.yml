@@ -1,0 +1,119 @@
+---
+# Install all the packages required
+- hosts: all
+  tasks:
+  - name: get nvim installer
+    get_url:
+      url: https://github.com/neovim/neovim/releases/download/v0.3.8/nvim.appimage
+      dest: /usr/local/bin/nvim
+      owner: 'vagrant'
+      mode: '0755'
+    become: true
+  - name: move nvim to vim
+    file:
+      src: /usr/local/bin/nvim
+      dest: /usr/local/bin/vim
+      owner: 'vagrant'
+      state: 'link'
+    become: true
+  - name: setup tmux config
+    copy:
+      src: .tmux.conf
+      dest: /home/vagrant/.tmux.conf
+  - name: install aptitude
+    apt:
+      name: aptitude
+    become: true
+  - name: yarn apt-key
+    apt_key:
+      url: https://dl.yarnpkg.com/debian/pubkey.gpg
+      state: present
+    become: true
+  - name: yarn repository
+    apt_repository:
+      repo: deb https://dl.yarnpkg.com/debian/ stable main
+      state: present
+    become: true
+  - name: install basic packages
+    apt:
+      name:
+        - tmux
+        - mosh
+        - docker
+        - nodejs
+        - yarn
+        - make
+        - git
+        - zsh
+      state: present
+      update_cache: yes
+    become: true
+  - name: uninstall vim
+    apt:
+      name:
+        - vim
+      state: absent
+    become: true
+  - name: setup envs file
+    copy:
+      src: envs
+      dest: /home/vagrant/envs
+      owner: 'vagrant'
+      mode: '0755'
+  - name: source env vars
+    command: /home/vagrant/envs
+  - name: Cloning  oh-my-zsh
+    git:
+      repo: https://github.com/robbyrussell/oh-my-zsh
+      dest: /home/vagrant/.oh-my-zsh
+    register: cloning
+  - name: Creating new ~/.zshrc
+    file:
+      src: ~/.oh-my-zsh/templates/zshrc.zsh-template
+      dest: ~/.zshrc
+      owner: 'vagrant'
+      state: 'hard'
+    when: cloning is success
+  - name: set zsh as default shell
+    command: chsh -s /bin/zsh vagrant
+    become: true
+  - name: create vimrc directory
+    file: 
+      dest: ~/.config/nvim/
+      state: directory
+  - name: copy vimrc
+    copy:
+      src: vimrc
+      dest: ~/.config/nvim/init.vim
+      owner: 'vagrant'
+  - name: symlink to .vimrc
+    file:
+      src: ~/.config/nvim/init.vim
+      dest: ~/.vimrc 
+      owner: 'vagrant'
+      state: 'link'
+  - name: create vimplug directory
+    file: 
+      dest: ~/.local/share/nvim/site/autoload
+      state: directory
+  - name: get vimplug
+    get_url:
+      url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      dest: ~/.local/share/nvim/site/autoload/plug.vim
+      owner: 'vagrant'
+      mode: '0755'
+  - name: create colors directory
+    file: 
+      dest: ~/.config/nvim/colors
+      state: directory
+  - name: get monokai color theme
+    get_url:
+      url: https://raw.githubusercontent.com/sickill/vim-monokai/master/colors/monokai.vim
+      dest: ~/.config/nvim/colors/monokai.vim
+  - name: copy fzf
+    git:
+      repo: https://github.com/junegunn/fzf.git
+      depth: 1
+      dest: ~/.fzf
+  - name: install fzf
+    command: ~/.fzf/install --all
