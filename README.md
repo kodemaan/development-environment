@@ -12,6 +12,8 @@ List of software
 * vim-plug
 * monokai (color scheme)
 * fzf
+* docker
+* ag (silver searcher)
 
 ## Requirements
 
