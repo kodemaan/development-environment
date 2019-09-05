@@ -1,6 +1,6 @@
-# My development environment in VIM
+# My development environment in Vagrant
 I decided to put my development environment into a vagrant VM provisioned by ansible since I use nvim and this will be easy
-way to setup my development environment again
+way to setup my development environment again. This works particularly well for me because I use vim but the mapped volume allows anyone to use this to program.
 List of software
 * tmux
 * docker
