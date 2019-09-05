@@ -44,6 +44,14 @@
       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
       state: present
     become: true
+  - name: copy personal scripts
+    copy:
+      src: scripts
+      dest: ~/scripts
+  - name: copy aliases file
+    copy:
+      src: zshaliases
+      dest: ~/.zsh_aliases
   - name: install basic packages
     apt:
       name:
@@ -58,8 +66,15 @@
         - ranger
         - docker-ce
         - silversearcher-ag
+        - python-pip
+        - libpq-dev
+        - python-dev
       state: present
       update_cache: yes
+    become: true
+  - name: pgcli install
+    pip:
+      name: pgcli
     become: true
   - name: add vagrant to docker group
     user:

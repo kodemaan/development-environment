@@ -1,0 +1,109 @@
+alias dc='docker-compose'
+alias gap='git add -p'
+alias ga='git add'
+alias gd='git diff'
+alias gst='git status'
+alias gF='git-flow'
+alias gff='git-flow feature'
+alias gffs='git-flow feature start'
+alias gffp='git-flow feature publish'
+alias gfff='git-flow feature finish'
+alias gfb='git-flow bugfix'
+alias gfbs='git-flow bugfix start'
+alias gfbp='git-flow bugfix publish'
+alias gfbf='git-flow bugfix finish'
+alias gupdev='git checkout develop;git pull origin develop'
+alias gbsort='git for-each-ref --sort=committerdate refs/heads/ --format="%(committerdate:short) %(refname:short)"'
+alias vim=nvim
+alias gpod='git pull origin develop'
+alias magap='make fix;ga -p'
+alias portainer='docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer'
+alias rmf='rm -rf'
+alias phpcs='docker run --rm -v $PWD:/code:ro wernight/phpcs phpcs'
+alias phpcbf='docker run --rm --user $(id -u):$(id -g)  --volume $(pwd):/project  herloct/phpcbf'
+alias yj='python ~/scripts/yarnjest.py'
+alias yc='python ~/scripts/yarncoverage.py'
+alias sqitch='~/scripts/sqitch'
+alias lsr='ls -lart'
+alias ctags="`brew --prefix`/bin/ctags"
+fbr() {
+  local branches branch
+  branches=$(git for-each-ref --count=30 --sort=-committerdate refs/heads/ --format="%(refname:short)") &&
+  branch=$(echo "$branches" |
+           fzf-tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
+  git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+}
+fco_preview() {
+  local tags branches target
+  tags=$(
+git tag | awk '{print "\x1b[31;1mtag\x1b[m\t" $1}') || return
+  branches=$(
+git branch --all | grep -v HEAD |
+sed "s/.* //" | sed "s#remotes/[^/]*/##" |
+sort -u | awk '{print "\x1b[34;1mbranch\x1b[m\t" $1}') || return
+  target=$(
+(echo "$tags"; echo "$branches") |
+    fzf --no-hscroll --no-multi --delimiter="\t" -n 2 \
+        --ansi --preview="git log -200 --pretty=format:%s $(echo {+2..} |  sed 's/$/../' )" ) || return
+  git checkout $(echo "$target" | awk '{print $2}')
+}
+# fshow - git commit browser
+fshow() {
+  git log --graph --color=always \
+      --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
+  fzf --ansi --no-sort --reverse --tiebreak=index --bind=ctrl-s:toggle-sort \
+      --bind "ctrl-m:execute:
+                (grep -o '[a-f0-9]\{7\}' | head -1 |
+                xargs -I % sh -c 'git show --color=always % | less -R') << 'FZF-EOF'
+                {}
+FZF-EOF"
+}
+fstash() {
+  local out q k sha
+  while out=$(
+    git stash list --pretty="%C(yellow)%h %>(14)%Cgreen%cr %C(blue)%gs" |
+    fzf --ansi --no-sort --query="$q" --print-query \
+        --expect=ctrl-d,ctrl-b);
+  do
+    mapfile -t out <<< "$out"
+    q="${out[0]}"
+    k="${out[1]}"
+    sha="${out[-1]}"
+    sha="${sha%% *}"
+    [[ -z "$sha" ]] && continue
+    if [[ "$k" == 'ctrl-d' ]]; then
+      git diff $sha
+    elif [[ "$k" == 'ctrl-b' ]]; then
+      git stash branch "stash-$sha" $sha
+      break;
+    else
+      git stash show -p $sha
+    fi
+  done
+}
+bip() {
+  local inst=$(brew search | fzf -m)
+
+  if [[ $inst ]]; then
+    for prog in $(echo $inst);
+    do; brew install $prog; done;
+  fi
+}
+bup() {
+  local upd=$(brew leaves | fzf -m)
+
+  if [[ $upd ]]; then
+    for prog in $(echo $upd);
+    do; brew upgrade $prog; done;
+  fi
+}
+# Delete (one or multiple) selected application(s)
+# mnemonic [B]rew [C]lean [P]lugin (e.g. uninstall)
+bcp() {
+  local uninst=$(brew leaves | fzf -m)
+
+  if [[ $uninst ]]; then
+    for prog in $(echo $uninst);
+    do; brew uninstall $prog; done;
+  fi
+}
