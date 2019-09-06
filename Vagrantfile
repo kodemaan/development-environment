@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
   # It may work better without VPN on my home setup and i'll re-add
   config.vm.network "forwarded_port", guest: 9320, host: 9320
   config.vm.network "forwarded_port", guest: 8888, host: 8888
-  config.vm.provision :ansible do |ansible|
+  config.vm.provision :ansible_local do |ansible|
     ansible.compatibility_mode = '2.0'
     ansible.playbook = "playbook.yml"
   end

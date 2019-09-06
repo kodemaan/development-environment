@@ -17,9 +17,11 @@
       state: 'link'
     become: true
   - name: setup tmux config
-    copy:
-      src: .tmux.conf
+    file:
+      src: /vagrant/.tmux.conf
       dest: /home/vagrant/.tmux.conf
+      state: link
+      owner: vagrant
   - name: install aptitude
     apt:
       name: aptitude
@@ -45,9 +47,10 @@
       state: present
     become: true
   - name: copy personal scripts
-    copy:
-      src: scripts
+    file:
+      src: /vagrant/scripts
       dest: ~/scripts
+      state: link
   - name: copy aliases file
     copy:
       src: zshaliases
@@ -101,13 +104,12 @@
       state: absent
     become: true
   - name: setup envs file
-    copy:
-      src: envs
-      dest: /home/vagrant/envs
+    file:
+      src: /vagrant/envs
+      dest: ~/envs
       owner: 'vagrant'
       mode: '0755'
-  - name: source env vars
-    command: /home/vagrant/envs
+      state: link
   - name: Cloning oh-my-zsh
     git:
       repo: https://github.com/robbyrussell/oh-my-zsh
@@ -116,10 +118,11 @@
     register: cloning
     become: true
   - name: Creating new ~/.zshrc
-    copy:
-      src: zshrc
+    file:
+      src: /vagrant/zshrc
       dest: ~/.zshrc
-      owner: 'vagrant'
+      owner: vagrant
+      state: link
     when: cloning is success
   - name: set zsh as default shell
     command: chsh -s /bin/zsh vagrant
@@ -129,13 +132,14 @@
       dest: ~/.config/nvim/
       state: directory
   - name: copy vimrc
-    copy:
-      src: vimrc
+    file:
+      src: /vagrant/vimrc
       dest: ~/.config/nvim/init.vim
       owner: 'vagrant'
+      state: link
   - name: symlink to .vimrc
     file:
-      src: ~/.config/nvim/init.vim
+      src: /vagrant/vimrc
       dest: ~/.vimrc 
       owner: 'vagrant'
       state: 'link'
