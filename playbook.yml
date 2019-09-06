@@ -52,6 +52,15 @@
     copy:
       src: zshaliases
       dest: ~/.zsh_aliases
+  - name: download node setup script 
+    get_url:
+      url: https://deb.nodesource.com/setup_10.x
+      dest: ~/nodeinstall 
+      mode: '0755'
+    become: true
+  - name: setup node script
+    command: ~/nodeinstall
+    become: true
   - name: install basic packages
     apt:
       name:
@@ -72,6 +81,10 @@
       state: present
       update_cache: yes
     become: true
+  - name: tmux plugin manager
+    git:
+      repo: https://github.com/tmux-plugins/tpm
+      dest: ~/.tmux/plugins/tpm
   - name: pgcli install
     pip:
       name: pgcli
@@ -101,6 +114,7 @@
       dest: /home/vagrant/.oh-my-zsh
       force: yes
     register: cloning
+    become: true
   - name: Creating new ~/.zshrc
     copy:
       src: zshrc
@@ -137,6 +151,12 @@
       mode: '0755'
   - name: install vimplug plugins
     command: vim -c :PlugInstall -c :qall
+    args:
+      creates: ~/.vim/plugged
+  - name: install coc-plugins
+    command: vim -c 'CocInstall -sync coc-snippets|q'
+    args:
+      creates: ~/.config/coc/extensions/node_modules/coc-snippets
   - name: create colors directory
     file: 
       dest: ~/.config/nvim/colors
@@ -152,3 +172,5 @@
       dest: ~/.fzf
   - name: install fzf
     command: ~/.fzf/install --all
+    args:
+      creates: ~/.fzf/bin/fzf

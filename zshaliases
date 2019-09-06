@@ -25,7 +25,6 @@ alias yj='python ~/scripts/yarnjest.py'
 alias yc='python ~/scripts/yarncoverage.py'
 alias sqitch='~/scripts/sqitch'
 alias lsr='ls -lart'
-alias ctags="`brew --prefix`/bin/ctags"
 fbr() {
   local branches branch
   branches=$(git for-each-ref --count=30 --sort=-committerdate refs/heads/ --format="%(refname:short)") &&
@@ -80,30 +79,4 @@ fstash() {
       git stash show -p $sha
     fi
   done
-}
-bip() {
-  local inst=$(brew search | fzf -m)
-
-  if [[ $inst ]]; then
-    for prog in $(echo $inst);
-    do; brew install $prog; done;
-  fi
-}
-bup() {
-  local upd=$(brew leaves | fzf -m)
-
-  if [[ $upd ]]; then
-    for prog in $(echo $upd);
-    do; brew upgrade $prog; done;
-  fi
-}
-# Delete (one or multiple) selected application(s)
-# mnemonic [B]rew [C]lean [P]lugin (e.g. uninstall)
-bcp() {
-  local uninst=$(brew leaves | fzf -m)
-
-  if [[ $uninst ]]; then
-    for prog in $(echo $uninst);
-    do; brew uninstall $prog; done;
-  fi
 }
